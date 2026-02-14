@@ -10,12 +10,15 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import * as bcrypt from 'bcryptjs';
 import { LogInDto } from './dto/log-in.dto';
+import { accessToken, JwtPayload } from 'src/utilits/types';
+import { JwtService } from '@nestjs/jwt';
 
 @Injectable()
 export class UsersService {
   constructor(
     @InjectRepository(UserEntity)
     private readonly userRepo: Repository<UserEntity>,
+    private readonly jwtService: JwtService,
   ) {}
 
   async findAllUsers() {
@@ -27,7 +30,7 @@ export class UsersService {
    * @param createUserDto
    * @returns jwt token
    */
-  async createNewUser(createUserDto: CreateUserDto) {
+  async createNewUser(createUserDto: CreateUserDto): Promise<accessToken> {
     const { email, username, password } = createUserDto;
     const user = await this.getUserByEmail(email);
     if (user) throw new BadRequestException('user already exist');
@@ -42,7 +45,9 @@ export class UsersService {
     });
 
     newUser = await this.userRepo.save(newUser);
-    return newUser;
+    const payLoad: JwtPayload = { id: newUser.id, userType: newUser.userType };
+    const accessToken = await this.generateAccessToken(payLoad);
+    return { accessToken };
   }
 
   async updateUser(id: number, updateUserDto: UpdateUserDto) {
@@ -70,7 +75,7 @@ export class UsersService {
    * @param logInDto
    * @returns jwt(access token)
    */
-  async logIn(logInDto: LogInDto) {
+  async logIn(logInDto: LogInDto): Promise<accessToken> {
     // console.log(logInDto.email);
     const { email, password } = logInDto;
     const user = await this.getUserByEmail(email);
@@ -79,12 +84,21 @@ export class UsersService {
     const pass = await bcrypt.compare(password, user.hashedPssword);
     // console.log(pass);
     if (!pass) throw new BadRequestException('bad credentials');
+
+    const payLoad: JwtPayload = { id: user.id, userType: user.userType };
+    const accessToken = await this.generateAccessToken(payLoad);
+
+    return { accessToken };
+  }
+
+  async getUserByEmail(email: string): Promise<UserEntity | null> {
+    const user = await this.userRepo.findOne({ where: { email } });
+    // if (!user) throw new NotFoundException('no user by this email');
     return user;
   }
 
-  async getUserByEmail(email: string) {
-    const user = await this.userRepo.findOne({ where: { email } });
-    if (!user) throw new NotFoundException('no user by this email');
-    return user;
+  private async generateAccessToken(payLoad: JwtPayload) {
+    const accessToken = await this.jwtService.signAsync(payLoad);
+    return accessToken;
   }
 }
