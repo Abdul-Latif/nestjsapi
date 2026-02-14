@@ -1,3 +1,4 @@
+import { Exclude } from 'class-transformer';
 import { ProductEntity } from 'src/products/entity/product.entity';
 import { ReviewEntity } from 'src/reviews/entity/review.entity';
 import { UserType } from 'src/utilits/user-type.enum';
@@ -5,7 +6,6 @@ import {
   Column,
   CreateDateColumn,
   Entity,
-  ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
@@ -17,13 +17,13 @@ export class UserEntity {
   id: number;
 
   @Column({ type: 'varchar', length: 150, nullable: true })
-  userName: string;
+  username: string;
 
   @Column({ type: 'varchar', length: 250, unique: true })
   email: string;
 
   @Column()
-  password: string;
+  hashedPssword: string;
 
   @Column({ type: 'enum', enum: UserType, default: UserType.USER })
   userType: UserType;
