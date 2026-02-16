@@ -10,11 +10,16 @@ import {
   ParseIntPipe,
   Patch,
   Post,
+  Req,
+  UseGuards,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { LogInDto } from './dto/log-in.dto';
+import { AuthGuard } from './guards/auth.guard';
+import { CurrentUser } from './decorators/user.decorator';
+import { JwtPayloadType } from 'src/utilits/types';
 
 @Controller('users')
 export class UsersController {
@@ -38,7 +43,7 @@ export class UsersController {
     return await this.usersService.updateUser(id, updateUserDto);
   }
 
-  @Get(':id')
+  @Get('user/:id')
   async getUserById(@Param('id', ParseIntPipe) id: number) {
     return await this.usersService.getUserById(id);
   }
@@ -52,5 +57,12 @@ export class UsersController {
   @HttpCode(HttpStatus.OK)
   async logIn(@Body() logInDto: LogInDto) {
     return await this.usersService.logIn(logInDto);
+  }
+
+  @Get('get-current-user')
+  @UseGuards(AuthGuard)
+  async currentUser(@CurrentUser() payLoad: JwtPayloadType) {
+    // console.log(payLoad);
+    return this.usersService.currentUser(payLoad.id);
   }
 }

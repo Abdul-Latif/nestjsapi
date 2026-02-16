@@ -10,7 +10,7 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import * as bcrypt from 'bcryptjs';
 import { LogInDto } from './dto/log-in.dto';
-import { accessToken, JwtPayload } from 'src/utilits/types';
+import { accessToken, JwtPayloadType } from 'src/utilits/types';
 import { JwtService } from '@nestjs/jwt';
 
 @Injectable()
@@ -45,7 +45,10 @@ export class UsersService {
     });
 
     newUser = await this.userRepo.save(newUser);
-    const payLoad: JwtPayload = { id: newUser.id, userType: newUser.userType };
+    const payLoad: JwtPayloadType = {
+      id: newUser.id,
+      userType: newUser.userType,
+    };
     const accessToken = await this.generateAccessToken(payLoad);
     return { accessToken };
   }
@@ -85,7 +88,7 @@ export class UsersService {
     // console.log(pass);
     if (!pass) throw new BadRequestException('bad credentials');
 
-    const payLoad: JwtPayload = { id: user.id, userType: user.userType };
+    const payLoad: JwtPayloadType = { id: user.id, userType: user.userType };
     const accessToken = await this.generateAccessToken(payLoad);
 
     return { accessToken };
@@ -97,8 +100,14 @@ export class UsersService {
     return user;
   }
 
-  private async generateAccessToken(payLoad: JwtPayload) {
+  private async generateAccessToken(payLoad: JwtPayloadType) {
     const accessToken = await this.jwtService.signAsync(payLoad);
     return accessToken;
+  }
+
+  async currentUser(id: number) {
+    const user = await this.userRepo.findOne({ where: { id } });
+    if (!user) throw new NotFoundException();
+    return user;
   }
 }
