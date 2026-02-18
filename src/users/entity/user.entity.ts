@@ -22,7 +22,7 @@ export class UserEntity {
   @Column({ type: 'varchar', length: 250, unique: true })
   email: string;
 
-  @Column(Exclude)
+  @Column({ select: false })
   hashedPssword: string;
 
   @Column({ type: 'enum', enum: UserType, default: UserType.USER })

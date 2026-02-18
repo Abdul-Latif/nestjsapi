@@ -20,6 +20,9 @@ import { LogInDto } from './dto/log-in.dto';
 import { AuthGuard } from './guards/auth.guard';
 import { CurrentUser } from './decorators/user.decorator';
 import { JwtPayloadType } from 'src/utilits/types';
+import { Roles } from './decorators/role.decorator';
+import { UserType } from 'src/utilits/user-type.enum';
+import { AuthRoleGuard } from './guards/auth-role.guard';
 
 @Controller('users')
 export class UsersController {
@@ -60,9 +63,11 @@ export class UsersController {
   }
 
   @Get('get-current-user')
-  @UseGuards(AuthGuard)
+  @Roles(UserType.ADMIN)
+  @UseGuards(AuthRoleGuard)
   async currentUser(@CurrentUser() payLoad: JwtPayloadType) {
     // console.log(payLoad);
     return this.usersService.currentUser(payLoad.id);
+    // console.log(user.);
   }
 }
