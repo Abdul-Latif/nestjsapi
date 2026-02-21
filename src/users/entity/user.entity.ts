@@ -23,7 +23,8 @@ export class UserEntity {
   email: string;
 
   @Column({ select: false })
-  hashedPssword: string;
+  @Exclude()
+  hashedPassword: string;
 
   @Column({ type: 'enum', enum: UserType, default: UserType.USER })
   userType: UserType;

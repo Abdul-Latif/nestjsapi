@@ -13,6 +13,7 @@ import {
   Req,
   UseGuards,
   Headers,
+  UseInterceptors,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -24,14 +25,16 @@ import { JwtPayloadType } from 'src/utilits/types';
 import { Roles } from './decorators/role.decorator';
 import { UserType } from 'src/utilits/user-type.enum';
 import { AuthRoleGuard } from './guards/auth-role.guard';
+import { loggerInterceptor } from 'src/utilits/interceptor/logger-interceptor';
 
 @Controller('users')
 export class UsersController {
   constructor(private usersService: UsersService) {}
 
   @Get('get-all-users')
-  @Roles(UserType.ADMIN)
+  @Roles(UserType.ADMIN, UserType.USER)
   @UseGuards(AuthRoleGuard)
+  // @UseInterceptors(loggerInterceptor)
   async findAllUsers() {
     return this.usersService.findAllUsers();
   }
@@ -43,6 +46,7 @@ export class UsersController {
 
   @Patch('update-user/:id')
   @UseGuards(AuthGuard)
+  // @UseInterceptors(loggerInterceptor)
   async updateUser(
     @Body() updateUserDto: UpdateUserDto,
     @Param('id', ParseIntPipe) id: number,
@@ -56,8 +60,13 @@ export class UsersController {
   }
 
   @Delete(':id')
-  async deleteUser(@Param('id', ParseIntPipe) id: number) {
-    return await this.usersService.deleteUser(id);
+  @UseGuards(AuthRoleGuard)
+  @Roles(UserType.ADMIN, UserType.USER)
+  async deleteUser(
+    @Param('id', ParseIntPipe) id: number,
+    @CurrentUser() payLoad: JwtPayloadType,
+  ) {
+    return await this.usersService.deleteUser(id, payLoad);
   }
 
   @Post('log-in')

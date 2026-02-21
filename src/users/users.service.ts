@@ -1,7 +1,9 @@
+import { CurrentUser } from './decorators/user.decorator';
 import {
   BadRequestException,
   Injectable,
   NotFoundException,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UserEntity } from './entity/user.entity';
@@ -35,13 +37,12 @@ export class UsersService {
     const user = await this.getUserByEmail(email);
     if (user) throw new BadRequestException('user already exist');
 
-    const salt = await bcrypt.genSalt(10);
-    const hashedPass = await bcrypt.hash(password, salt);
+    const hashedPass = await this.hashedPassword(createUserDto.password);
 
     let newUser = this.userRepo.create({
       email,
       username,
-      hashedPssword: hashedPass,
+      hashedPassword: hashedPass,
     });
 
     newUser = await this.userRepo.save(newUser);
@@ -54,11 +55,16 @@ export class UsersService {
   }
 
   async updateUser(id: number, updateUserDto: UpdateUserDto) {
+    const { password, username, email } = updateUserDto;
     const user = await this.getUserById(id);
     user.email = updateUserDto.email ?? user.email;
-    user.hashedPssword = updateUserDto.password ?? user.hashedPssword;
+    // user.hashedPassword = updateUserDto.password ?? user.hashedPassword;
     user.username = updateUserDto.username ?? user.username;
-    return await this.userRepo.save(user);
+    if (password) {
+      user.hashedPassword = await this.hashedPassword(password);
+    }
+    await this.userRepo.save(user);
+    return `updated succeffully!`;
   }
 
   async getUserById(id: number) {
@@ -68,9 +74,13 @@ export class UsersService {
     return user;
   }
 
-  async deleteUser(id: number) {
-    const user = this.getUserById(id);
-    return await this.userRepo.delete(id);
+  async deleteUser(id: number, payLoad: JwtPayloadType) {
+    const user = await this.currentUser(id);
+    if (user.id === payLoad.id || payLoad.userType === 'ADMIN') {
+      await this.userRepo.delete(id);
+      return `deleted succeffully`;
+    }
+    throw new UnauthorizedException();
   }
 
   /**
@@ -84,7 +94,7 @@ export class UsersService {
     const user = await this.getUserByEmail(email);
     // console.log(user);
     if (!user) throw new NotFoundException('there is no usre by this email');
-    const pass = await bcrypt.compare(password, user.hashedPssword);
+    const pass = await bcrypt.compare(password, user.hashedPassword);
     // console.log(pass);
     if (!pass) throw new BadRequestException('bad credentials');
 
@@ -97,7 +107,7 @@ export class UsersService {
   async getUserByEmail(email: string): Promise<UserEntity | null> {
     const user = await this.userRepo.findOne({
       where: { email },
-      select: ['id', 'email', 'hashedPssword'],
+      select: ['id', 'email', 'hashedPassword'],
     });
 
     // if (!user) throw new NotFoundException('no user by this email');
@@ -113,5 +123,10 @@ export class UsersService {
     const user = await this.userRepo.findOne({ where: { id } });
     if (!user) throw new NotFoundException();
     return user;
+  }
+
+  private async hashedPassword(password: string): Promise<string> {
+    const salt = await bcrypt.genSalt(10);
+    return bcrypt.hash(password, salt);
   }
 }
