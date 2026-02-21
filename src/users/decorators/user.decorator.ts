@@ -5,6 +5,7 @@ export const CurrentUser = createParamDecorator(
   (data: unknown, ctx: ExecutionContext) => {
     const request = ctx.switchToHttp().getRequest();
     const payLoad: JwtPayloadType = request['user'];
+    // return request['user'];
     return payLoad;
   },
 );

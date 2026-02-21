@@ -95,7 +95,11 @@ export class UsersService {
   }
 
   async getUserByEmail(email: string): Promise<UserEntity | null> {
-    const user = await this.userRepo.findOne({ where: { email } });
+    const user = await this.userRepo.findOne({
+      where: { email },
+      select: ['id', 'email', 'hashedPssword'],
+    });
+
     // if (!user) throw new NotFoundException('no user by this email');
     return user;
   }

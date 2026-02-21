@@ -12,6 +12,7 @@ import {
   Post,
   Req,
   UseGuards,
+  Headers,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -29,6 +30,8 @@ export class UsersController {
   constructor(private usersService: UsersService) {}
 
   @Get('get-all-users')
+  @Roles(UserType.ADMIN)
+  @UseGuards(AuthRoleGuard)
   async findAllUsers() {
     return this.usersService.findAllUsers();
   }
@@ -39,6 +42,7 @@ export class UsersController {
   }
 
   @Patch('update-user/:id')
+  @UseGuards(AuthGuard)
   async updateUser(
     @Body() updateUserDto: UpdateUserDto,
     @Param('id', ParseIntPipe) id: number,
@@ -63,11 +67,11 @@ export class UsersController {
   }
 
   @Get('get-current-user')
+  // @UseGuards(AuthGuard)
   @Roles(UserType.ADMIN)
+  // @Roles(UserType.ADMIN)
   @UseGuards(AuthRoleGuard)
   async currentUser(@CurrentUser() payLoad: JwtPayloadType) {
-    // console.log(payLoad);
     return this.usersService.currentUser(payLoad.id);
-    // console.log(user.);
   }
 }
