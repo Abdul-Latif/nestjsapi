@@ -1,4 +1,4 @@
-import { ReviewsService } from './../reviews/reviews.service';
+import { ReviewsService } from '../reviews/reviews.service';
 import {
   Body,
   Controller,
@@ -15,7 +15,7 @@ import {
   Headers,
   UseInterceptors,
 } from '@nestjs/common';
-import { UsersService } from './users.service';
+import { UsersService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { LogInDto } from './dto/log-in.dto';
@@ -25,14 +25,13 @@ import { JwtPayloadType } from 'src/utilits/types';
 import { Roles } from './decorators/role.decorator';
 import { UserType } from 'src/utilits/user-type.enum';
 import { AuthRoleGuard } from './guards/auth-role.guard';
-import { loggerInterceptor } from 'src/utilits/interceptor/logger-interceptor';
 
 @Controller('users')
 export class UsersController {
   constructor(private usersService: UsersService) {}
 
   @Get('get-all-users')
-  @Roles(UserType.ADMIN, UserType.USER)
+  @Roles(UserType.ADMIN)
   @UseGuards(AuthRoleGuard)
   // @UseInterceptors(loggerInterceptor)
   async findAllUsers() {

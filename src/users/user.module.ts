@@ -1,17 +1,17 @@
-import { SignOptions } from './../../node_modules/@types/jsonwebtoken/index.d';
 import { Module } from '@nestjs/common';
-import { UsersService } from './users.service';
-import { UsersController } from './users.controller';
+import { UsersService } from './user.service';
+import { UsersController } from './user.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { UserEntity } from './entity/user.entity';
 import { ReviewEntity } from 'src/reviews/entity/review.entity';
 import { ProductEntity } from 'src/products/entity/product.entity';
 import { JwtModule } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
+import { AuthProvider } from './auth.provider';
 
 @Module({
   controllers: [UsersController],
-  providers: [UsersService],
+  providers: [UsersService, AuthProvider],
   imports: [
     TypeOrmModule.forFeature([UserEntity, ReviewEntity, ProductEntity]),
     JwtModule.registerAsync({

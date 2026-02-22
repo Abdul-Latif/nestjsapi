@@ -25,8 +25,8 @@ export class ProductEntity {
   @UpdateDateColumn()
   updatedAt: Date;
 
-  @OneToMany(() => ReviewEntity, (r) => r.product)
+  @OneToMany(() => ReviewEntity, (r) => r.product, { eager: true })
   reviews: ReviewEntity[];
-  @ManyToOne(() => UserEntity, (u) => u.product)
+  @ManyToOne(() => UserEntity, (u) => u.product, { eager: true })
   user: UserEntity;
 }

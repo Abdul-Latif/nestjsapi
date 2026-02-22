@@ -11,8 +11,7 @@ import { JwtPayloadType } from 'src/utilits/types';
 import { ConfigService } from '@nestjs/config';
 import { UserType } from 'src/utilits/user-type.enum';
 import { Reflector } from '@nestjs/core';
-import { UsersService } from '../users.service';
-import { NotFoundError } from 'rxjs';
+import { UsersService } from '../user.service';
 
 @Injectable()
 export class AuthRoleGuard implements CanActivate {
