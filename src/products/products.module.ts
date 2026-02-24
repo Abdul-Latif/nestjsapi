@@ -10,6 +10,7 @@ import { UsersModule } from 'src/users/user.module';
 
 @Module({
   controllers: [ProductsController],
+  exports: [ProductService],
   providers: [ProductService],
   imports: [
     TypeOrmModule.forFeature([ProductEntity, UserEntity, ReviewEntity]),

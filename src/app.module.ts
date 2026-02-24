@@ -14,6 +14,7 @@ import { APP_INTERCEPTOR } from '@nestjs/core';
     },
   ],
   imports: [
+    // ReviewsModule,
     ProductsModule,
     ReviewsModule,
     UsersModule,
