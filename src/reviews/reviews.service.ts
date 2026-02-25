@@ -1,6 +1,11 @@
+import { UserType } from 'src/utilits/user-type.enum';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { JwtPayloadType } from 'src/utilits/types';
 import { CreateReviewDto } from './dto/review.dto';
 import { UpdateReviewDto } from './dto/update-review.dto';
@@ -8,6 +13,7 @@ import { ReviewEntity } from './entity/review.entity';
 import { UsersService } from 'src/users/user.service';
 import { ProductEntity } from 'src/products/entity/product.entity';
 import { ProductService } from 'src/products/products.service';
+import { reverse } from 'dns';
 
 @Injectable()
 export class ReviewsService {
@@ -18,8 +24,12 @@ export class ReviewsService {
     private readonly productService: ProductService,
   ) {}
 
-  async findAllReviews() {
-    return await this.reviewRepo.find();
+  async findAllReviews(pageNumber: number, reviewPerPage: number) {
+    return await this.reviewRepo.find({
+      skip: reviewPerPage * (pageNumber - 1),
+      take: reviewPerPage,
+      order: { createdAt: 'DESC' },
+    });
   }
 
   public async createNewReview(
@@ -51,29 +61,22 @@ export class ReviewsService {
     return review;
   }
 
-  // public async updateReview(
-  //   updatereviewDto: UpdateReviewDto,
-  //   id: number,
-  //   payLoad: JwtPayloadType,
-  // ) {
-  //   const { description, rating, productId } = updatereviewDto;
-  //   const user = await this.userService.getUserById(payLoad.id);
-  //   const review = await this.getReviewById(id);
-  //   const userId = payLoad.id;
-  //   const reviewUserId = review.user.id;
-  //   const product = await this.productService.getProductById(productId);
+  public async updateReview(
+    updatereviewDto: UpdateReviewDto,
+    reviewId: number,
+    userId: number,
+  ) {
+    const review = await this.getReviewById(reviewId);
+    const user = await this.userService.currentUser(userId);
+    if (userId != user.id) throw new ForbiddenException();
+    review.description = updatereviewDto.description ?? review.description;
+    review.rating = updatereviewDto.rating ?? review.rating;
 
-  //   if (reviewUserId === userId) {
-  //     review.description = description ?? review.description;
-  //     review.rating = rating ?? review.rating;
-  //     review.productId = productId ?? review.product;
-  //   } else {
-  //     return 'only the author of this review can modify it';
-  //   }
-  //   return review;
-  // }
+    return await this.reviewRepo.save(review);
+  }
 
   public async removeReview(id: number) {
-    return await this.reviewRepo.softDelete(id);
+    const reveiw = await this.getReviewById(id);
+    return await this.reviewRepo.delete(reveiw.id);
   }
 }

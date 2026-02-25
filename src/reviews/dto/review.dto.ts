@@ -9,13 +9,13 @@ import {
 } from 'class-validator';
 
 export class CreateReviewDto {
-  @MinLength(4)
-  @MaxLength(140)
-  @IsString()
-  description: string;
-
   @IsNumber()
   @Min(1)
   @Max(5)
   rating: number;
+
+  @MinLength(4)
+  @MaxLength(140)
+  @IsString()
+  description: string;
 }
