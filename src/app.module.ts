@@ -5,6 +5,7 @@ import { UsersModule } from './users/user.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { APP_INTERCEPTOR } from '@nestjs/core';
+import { UploadModule } from './uploads/uploads.module';
 
 @Module({
   providers: [
@@ -18,6 +19,7 @@ import { APP_INTERCEPTOR } from '@nestjs/core';
     ProductsModule,
     ReviewsModule,
     UsersModule,
+    UploadModule,
     TypeOrmModule.forRootAsync({
       inject: [ConfigService],
       useFactory: (config: ConfigService) => {

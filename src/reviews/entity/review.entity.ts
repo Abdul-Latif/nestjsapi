@@ -5,7 +5,6 @@ import {
   CreateDateColumn,
   Entity,
   ManyToOne,
-  OneToMany,
   UpdateDateColumn,
 } from 'typeorm';
 import { PrimaryGeneratedColumn } from 'typeorm';
@@ -21,10 +20,15 @@ export class ReviewEntity {
   @Column({ type: 'int' })
   rating: number;
 
-  @ManyToOne(() => ProductEntity, (p) => p.reviews)
+  @ManyToOne(() => ProductEntity, (p) => p.reviews, {
+    onDelete: 'CASCADE',
+  })
   product: ProductEntity;
 
-  @ManyToOne(() => UserEntity, (u) => u.review)
+  @ManyToOne(() => UserEntity, (u) => u.review, {
+    eager: true,
+    onDelete: 'CASCADE',
+  })
   user: UserEntity;
 
   @CreateDateColumn()

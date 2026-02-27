@@ -1,4 +1,3 @@
-import { UserType } from 'src/utilits/user-type.enum';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import {
@@ -6,14 +5,11 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { JwtPayloadType } from 'src/utilits/types';
 import { CreateReviewDto } from './dto/review.dto';
 import { UpdateReviewDto } from './dto/update-review.dto';
 import { ReviewEntity } from './entity/review.entity';
 import { UsersService } from 'src/users/user.service';
-import { ProductEntity } from 'src/products/entity/product.entity';
 import { ProductService } from 'src/products/products.service';
-import { reverse } from 'dns';
 
 @Injectable()
 export class ReviewsService {

@@ -1,4 +1,3 @@
-import { UserEntity } from 'src/users/entity/user.entity';
 import { AuthGuard } from './../users/guards/auth.guard';
 import {
   Body,
@@ -20,7 +19,6 @@ import { JwtPayloadType } from 'src/utilits/types';
 import { AuthRoleGuard } from 'src/users/guards/auth-role.guard';
 import { Roles } from 'src/users/decorators/role.decorator';
 import { UserType } from 'src/utilits/user-type.enum';
-import { reverse } from 'dns';
 
 @Controller('reviews')
 export class ReviewsController {
