@@ -79,4 +79,10 @@ export class UsersService {
     if (!user) throw new NotFoundException();
     return user;
   }
+
+  async setProfileImage(userId: number, newPfp: string) {
+    const user = await this.currentUser(userId);
+    user.profileImage = newPfp;
+    return await this.userRepo.save(user);
+  }
 }

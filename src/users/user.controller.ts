@@ -14,6 +14,8 @@ import {
   UseGuards,
   Headers,
   UseInterceptors,
+  BadRequestException,
+  UploadedFile,
 } from '@nestjs/common';
 import { UsersService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -25,6 +27,8 @@ import { JwtPayloadType } from 'src/utilits/types';
 import { Roles } from './decorators/role.decorator';
 import { UserType } from 'src/utilits/user-type.enum';
 import { AuthRoleGuard } from './guards/auth-role.guard';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { diskStorage } from 'multer';
 
 @Controller('users')
 export class UsersController {
@@ -81,5 +85,16 @@ export class UsersController {
   @UseGuards(AuthRoleGuard)
   async currentUser(@CurrentUser() payLoad: JwtPayloadType) {
     return this.usersService.currentUser(payLoad.id);
+  }
+
+  @Post('upload-pfp')
+  @UseInterceptors(FileInterceptor('file'))
+  @UseGuards(AuthGuard)
+  public async setPfp(
+    @CurrentUser() payLoad: JwtPayloadType,
+    @UploadedFile() file: Express.Multer.File,
+  ) {
+    if (!file) throw new BadRequestException('file not found');
+    return await this.usersService.setProfileImage(payLoad.id, file.filename);
   }
 }

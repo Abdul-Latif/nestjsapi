@@ -32,6 +32,9 @@ export class UserEntity {
   @Column({ type: 'boolean', default: false })
   isValidated: boolean;
 
+  @Column({ nullable: true, default: null })
+  profileImage: string;
+
   @CreateDateColumn()
   createdAt: Date;
 
