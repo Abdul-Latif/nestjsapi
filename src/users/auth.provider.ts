@@ -2,6 +2,7 @@ import {
   BadRequestException,
   Injectable,
   NotFoundException,
+  RequestTimeoutException,
 } from '@nestjs/common';
 import { JwtPayloadType } from 'src/utilits/types';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -11,6 +12,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { UserEntity } from './entity/user.entity';
 import { Repository } from 'typeorm';
 import * as bcrypt from 'bcryptjs';
+import { MailerService } from '@nestjs-modules/mailer';
 
 @Injectable()
 export class AuthProvider {
@@ -18,6 +20,7 @@ export class AuthProvider {
     private readonly jwtService: JwtService,
     @InjectRepository(UserEntity)
     private readonly userRepo: Repository<UserEntity>,
+    private readonly mailerService: MailerService,
   ) {}
   /**
    * create new user
@@ -66,7 +69,16 @@ export class AuthProvider {
 
     const payLoad: JwtPayloadType = { id: user.id, userType: user.userType };
     const accessToken = await this.generateAccessToken(payLoad);
-
+    try {
+      const today = new Date();
+      await this.mailerService.sendMail({
+        to: user.email,
+        subject: `you logged in today at ${today}`,
+      });
+    } catch (error) {
+      console.log(error);
+      throw new RequestTimeoutException();
+    }
     return { accessToken };
   }
   private async generateAccessToken(payLoad: JwtPayloadType) {

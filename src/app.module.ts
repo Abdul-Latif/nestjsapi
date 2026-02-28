@@ -6,6 +6,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { APP_INTERCEPTOR } from '@nestjs/core';
 import { UploadModule } from './uploads/uploads.module';
+import { MailModule } from './mail/mail.module';
 
 @Module({
   providers: [
@@ -18,6 +19,7 @@ import { UploadModule } from './uploads/uploads.module';
     // ReviewsModule,
     ProductsModule,
     ReviewsModule,
+    MailModule,
     UsersModule,
     UploadModule,
     TypeOrmModule.forRootAsync({
